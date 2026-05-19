@@ -72,6 +72,8 @@ TELEGRAM_BOT_TOKEN
 TELEGRAM_WEBHOOK_SECRET
 ```
 
+See `VERCEL_DEPLOY.md` for the deployment checklist.
+
 ## Audio Uploads
 
 The current audio endpoint writes uploaded recordings to local disk. This is fine for local development, but serverless platforms such as Vercel do not provide durable local file storage. Use Vercel Blob, S3, Supabase Storage, or Cloudinary before relying on audio uploads in production.
