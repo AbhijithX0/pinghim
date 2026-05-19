@@ -8,7 +8,7 @@ A private, emotion-first communication platform for couples.
 - React
 - Tailwind CSS
 - Prisma ORM
-- SQLite for local development
+- PostgreSQL
 - Telegram Bot API webhook
 - Web Audio API with local file uploads
 
@@ -24,10 +24,10 @@ A private, emotion-first communication platform for couples.
    copy .env.example .env.local
    ```
 
-3. Create the local database:
+3. Set `DATABASE_URL` in `.env.local` to a PostgreSQL database, then create the schema:
    ```bash
    npm.cmd run db:generate
-   npm.cmd run db:init
+   npm.cmd run db:push
    ```
 
 4. Start the app:
@@ -56,6 +56,22 @@ curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook?url=https://YOU
 
 ## Production Database
 
-The app currently uses Prisma with SQLite for local development. For production, switch `prisma/schema.prisma` to PostgreSQL and update `DATABASE_URL`, then create a migration with Prisma.
+The app uses Prisma with PostgreSQL. Set `DATABASE_URL` to a hosted Postgres connection string in your deployment provider, then run:
 
-For local SQLite, `DATABASE_URL` should point to the database file relative to `prisma/schema.prisma`, for example `file:./emotional-ping.db`.
+```bash
+npm.cmd run db:push
+```
+
+For Vercel, add these environment variables in Project Settings:
+
+```text
+DATABASE_URL
+SESSION_SECRET
+NEXT_PUBLIC_TELEGRAM_BOT_USERNAME
+TELEGRAM_BOT_TOKEN
+TELEGRAM_WEBHOOK_SECRET
+```
+
+## Audio Uploads
+
+The current audio endpoint writes uploaded recordings to local disk. This is fine for local development, but serverless platforms such as Vercel do not provide durable local file storage. Use Vercel Blob, S3, Supabase Storage, or Cloudinary before relying on audio uploads in production.

@@ -7,3 +7,8 @@ lib
 firebase-debug.log
 firestore-debug.log
 storage-debug.log
+*.db
+*.db-journal
+prisma/*.db
+prisma/*.db-journal
+public/uploads/
