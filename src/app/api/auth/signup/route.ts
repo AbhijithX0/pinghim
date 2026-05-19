@@ -14,44 +14,52 @@ const schema = z.object({
 });
 
 export async function POST(request: Request) {
-  const parsed = schema.safeParse(await request.json());
-  if (!parsed.success) return jsonError("Please check your signup details.");
+  try {
+    const parsed = schema.safeParse(await request.json());
+    if (!parsed.success) return jsonError("Please check your signup details.");
 
-  const { name, email, password, partnerCode } = parsed.data;
-  const normalizedEmail = email.toLowerCase().trim();
-  const normalizedCode = partnerCode?.trim().toUpperCase();
+    const { name, email, password, partnerCode } = parsed.data;
+    const normalizedEmail = email.toLowerCase().trim();
+    const normalizedCode = partnerCode?.trim().toUpperCase();
 
-  const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
-  if (existing) return jsonError("An account with that email already exists.");
+    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    if (existing) return jsonError("An account with that email already exists.");
 
-  const passwordHash = await hash(password, 12);
-  const inviteCode = normalizedCode ? null : await uniqueInviteCode();
+    const passwordHash = await hash(password, 12);
+    const inviteCode = normalizedCode ? null : await uniqueInviteCode();
 
-  const user = await prisma.$transaction(async (tx) => {
-    let partnerId: string | null = null;
+    const user = await prisma.$transaction(async (tx) => {
+      let partnerId: string | null = null;
 
-    if (normalizedCode) {
-      const partner = await tx.user.findUnique({ where: { inviteCode: normalizedCode } });
-      if (!partner) throw new Error("That partner code was not found.");
-      if (partner.partnerId) throw new Error("That partner code is already connected.");
-      partnerId = partner.id;
+      if (normalizedCode) {
+        const partner = await tx.user.findUnique({ where: { inviteCode: normalizedCode } });
+        if (!partner) throw new Error("That partner code was not found.");
+        if (partner.partnerId) throw new Error("That partner code is already connected.");
+        partnerId = partner.id;
 
-      const created = await tx.user.create({
-        data: { name, email: normalizedEmail, passwordHash, partnerId },
+        const created = await tx.user.create({
+          data: { name, email: normalizedEmail, passwordHash, partnerId },
+          select: { id: true }
+        });
+        await tx.user.update({ where: { id: partner.id }, data: { partnerId: created.id } });
+        return created;
+      }
+
+      return tx.user.create({
+        data: { name, email: normalizedEmail, passwordHash, inviteCode },
         select: { id: true }
       });
-      await tx.user.update({ where: { id: partner.id }, data: { partnerId: created.id } });
-      return created;
-    }
-
-    return tx.user.create({
-      data: { name, email: normalizedEmail, passwordHash, inviteCode },
-      select: { id: true }
     });
-  });
 
-  await createSession(user.id);
-  return NextResponse.json({ ok: true });
+    await createSession(user.id);
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("Signup failed", error);
+    if (error instanceof Error && error.message.includes("partner code")) {
+      return jsonError(error.message);
+    }
+    return jsonError("Signup failed. Please check the database setup and try again.", 500);
+  }
 }
 
 async function uniqueInviteCode() {
