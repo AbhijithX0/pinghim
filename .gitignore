@@ -12,3 +12,5 @@ storage-debug.log
 prisma/*.db
 prisma/*.db-journal
 public/uploads/
+
+.vercel

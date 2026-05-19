@@ -6,13 +6,14 @@ Set these in Vercel Project Settings > Environment Variables:
 
 ```text
 DATABASE_URL
+DIRECT_URL
 SESSION_SECRET
 NEXT_PUBLIC_TELEGRAM_BOT_USERNAME
 TELEGRAM_BOT_TOKEN
 TELEGRAM_WEBHOOK_SECRET
 ```
 
-`DATABASE_URL` must be a PostgreSQL connection string. SQLite database files do not persist on Vercel.
+`DATABASE_URL` must be a PostgreSQL connection string. For Supabase, use the pooled URL for `DATABASE_URL` and the non-pooling URL for `DIRECT_URL`. SQLite database files do not persist on Vercel.
 
 ## Database Setup
 
