@@ -3,7 +3,7 @@
 .next
 node_modules
 dist
-lib
+/lib
 firebase-debug.log
 firestore-debug.log
 storage-debug.log
