@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String              @id @default(cuid())
+  name              String
+  email             String              @unique
+  passwordHash      String
+  partnerId         String?
+  partner           User?               @relation("PartnerConnection", fields: [partnerId], references: [id])
+  connectedUsers    User[]              @relation("PartnerConnection")
+  inviteCode        String?             @unique
+  telegramConnected Boolean             @default(false)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  telegram          TelegramConnection?
+  sentPings         Ping[]              @relation("SentPings")
+  receivedPings     Ping[]              @relation("ReceivedPings")
+  responses         Response[]
+  sentSongs         Song[]              @relation("SentSongs")
+  receivedSongs     Song[]              @relation("ReceivedSongs")
+  sentAudio         AudioNote[]         @relation("SentAudio")
+  receivedAudio     AudioNote[]         @relation("ReceivedAudio")
+}
+
+model TelegramConnection {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chatId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Ping {
+  id          String     @id @default(cuid())
+  senderId    String
+  receiverId  String
+  sender      User       @relation("SentPings", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User       @relation("ReceivedPings", fields: [receiverId], references: [id], onDelete: Cascade)
+  text        String
+  category    String
+  isUrgent    Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  seenAt      DateTime?
+  respondedAt DateTime?
+  responses   Response[]
+
+  @@index([senderId, createdAt])
+  @@index([receiverId, createdAt])
+}
+
+model Response {
+  id        String   @id @default(cuid())
+  pingId    String
+  ping      Ping     @relation(fields: [pingId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  type      String
+  message   String
+  createdAt DateTime @default(now())
+
+  @@index([pingId, createdAt])
+}
+
+model Song {
+  id          String   @id @default(cuid())
+  senderId    String
+  receiverId  String
+  sender      User     @relation("SentSongs", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User     @relation("ReceivedSongs", fields: [receiverId], references: [id], onDelete: Cascade)
+  title       String
+  youtubeLink String
+  message     String
+  createdAt   DateTime @default(now())
+
+  @@index([senderId, createdAt])
+  @@index([receiverId, createdAt])
+}
+
+model AudioNote {
+  id         String   @id @default(cuid())
+  senderId   String
+  receiverId String
+  sender     User     @relation("SentAudio", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User     @relation("ReceivedAudio", fields: [receiverId], references: [id], onDelete: Cascade)
+  url        String
+  durationMs Int
+  createdAt  DateTime @default(now())
+
+  @@index([senderId, createdAt])
+  @@index([receiverId, createdAt])
+}

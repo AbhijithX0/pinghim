@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  background: #f8ecdf;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(207, 118, 128, 0.28), transparent 24rem),
+    radial-gradient(circle at top right, rgba(200, 141, 109, 0.18), transparent 28rem),
+    linear-gradient(180deg, #fff7f0 0%, #f9ecde 45%, #f6e6d8 100%);
+  color: #4e3427;
+  font-feature-settings: "liga" 1, "kern" 1;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.32), transparent 38%),
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.34), transparent 22%);
+  opacity: 0.8;
+}
+
+::selection {
+  background: rgba(207, 118, 128, 0.22);
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.soft-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(133, 51, 71, 0.28) transparent;
+}
+
+.soft-scroll::-webkit-scrollbar {
+  height: 0.45rem;
+  width: 0.45rem;
+}
+
+.soft-scroll::-webkit-scrollbar-thumb {
+  background: rgba(133, 51, 71, 0.28);
+  border-radius: 999px;
+}
